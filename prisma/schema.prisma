@@ -1,0 +1,102 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  ADMIN
+  MANAGER
+}
+
+model Admin {
+  id            String              @id @default(cuid())
+  email         String              @unique
+  name          String?
+  passwordHash  String
+  role          Role                @default(ADMIN)
+  createdAt     DateTime            @default(now())
+  updatedAt     DateTime            @updatedAt
+  
+  notifications AdminNotification[]
+}
+
+model Event {
+  id          String   @id @default(cuid())
+  title       String
+  date        DateTime
+  time        String?
+  location    String
+  meetingLink String?
+  description String   @db.Text
+  category    String   @default("other")
+  status      String   @default("UPCOMING")
+  upcoming    Boolean  @default(true)
+  featured    Boolean  @default(false)
+  image       String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model TeamMember {
+  id           String   @id @default(cuid())
+  name         String
+  role         String
+  department   String
+  bio          String   @db.Text
+  email        String?
+  phone        String?
+  initials     String
+  badge        String?
+  image        String?
+  isActive     Boolean  @default(true)
+  displayOrder Int      @default(0)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+model Member {
+  id             String   @id @default(cuid())
+  firstName      String
+  lastName       String
+  email          String?  @unique
+  phone          String?
+  address        String?  @db.Text
+  educationLevel String?  // "Primary" | "Secondary" | "Higher Secondary" | "Graduate" | "Post Graduate" | "Other"
+  institution    String?
+  skills         String?  @db.Text // comma-separated or JSON string
+  image          String?
+  isActive       Boolean  @default(true)
+  joinedAt       DateTime @default(now())
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+}
+
+model Announcement {
+  id          String   @id @default(cuid())
+  title       String
+  content     String   @db.Text
+  summary     String
+  category    String   @default("General")
+  badge       String?
+  important   Boolean  @default(false)
+  published   Boolean  @default(false)
+  publishedAt DateTime?
+  date        DateTime @default(now())
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model AdminNotification {
+  id        String   @id @default(cuid())
+  adminId   String
+  message   String
+  read      Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  admin     Admin    @relation(fields: [adminId], references: [id], onDelete: Cascade)
+}
