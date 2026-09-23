@@ -68,7 +68,7 @@ export default function AboutPage() {
               <p className="text-dark-text/65 leading-relaxed mb-4">
                 Our mission is to create an inclusive, vibrant platform where every young person in
                 Elevo can discover their potential, build meaningful connections, and contribute
-                actively to our village.
+                actively to our village ..
               </p>
               <p className="text-dark-text/65 leading-relaxed">
                 We believe that when youth are equipped with platforms to lead, communities
