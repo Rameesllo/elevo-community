@@ -8,14 +8,15 @@ interface MemberFormProps {
     id?: string;
     firstName?: string;
     lastName?: string;
-    email?: string;
-    phone?: string;
-    address?: string;
-    educationLevel?: string;
-    institution?: string;
-    skills?: string;
-    image?: string;
+    email?: string | null;
+    phone?: string | null;
+    address?: string | null;
+    educationLevel?: string | null;
+    institution?: string | null;
+    skills?: string | null;
+    image?: string | null;
     isActive?: boolean;
+    joinedAt?: string;
   };
   isEditing?: boolean;
 }
@@ -39,14 +40,15 @@ export default function MemberForm({ initialData = {}, isEditing = false }: Memb
   const [formData, setFormData] = useState({
     firstName: initialData.firstName || "",
     lastName: initialData.lastName || "",
-    email: initialData.email || "",
-    phone: initialData.phone || "",
-    address: initialData.address || "",
-    educationLevel: initialData.educationLevel || "",
-    institution: initialData.institution || "",
-    skills: initialData.skills || "",
-    image: initialData.image || "",
+    email: initialData.email ?? "",
+    phone: initialData.phone ?? "",
+    address: initialData.address ?? "",
+    educationLevel: initialData.educationLevel ?? "",
+    institution: initialData.institution ?? "",
+    skills: initialData.skills ?? "",
+    image: initialData.image ?? "",
     isActive: initialData.isActive !== undefined ? initialData.isActive : true,
+    joinedAt: initialData.joinedAt ?? "",
   });
 
   function handleChange(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) {
@@ -117,7 +119,7 @@ export default function MemberForm({ initialData = {}, isEditing = false }: Memb
 
   return (
     <form onSubmit={handleSubmit} className="member-form">
-      <style jsx>{`
+      <style>{`
         .member-form {
           display: flex;
           flex-direction: column;
@@ -435,20 +437,35 @@ export default function MemberForm({ initialData = {}, isEditing = false }: Memb
       </div>
 
       <div>
-        <div className="section-header">Status</div>
-        <div className="toggle-row" style={{ marginTop: "1rem" }}>
-          <label className="toggle-switch">
+        <div className="section-header">Status &amp; Dates</div>
+        <div style={{ marginTop: "1rem", display: "flex", flexDirection: "column", gap: "1rem" }}>
+          <div className="form-group">
+            <label htmlFor="joinedAt">Joined Date</label>
             <input
-              type="checkbox"
-              name="isActive"
-              checked={formData.isActive}
-              onChange={(e) => setFormData((prev) => ({ ...prev, isActive: e.target.checked }))}
+              id="joinedAt"
+              name="joinedAt"
+              type="date"
+              value={formData.joinedAt}
+              onChange={handleChange}
             />
-            <span className="slider"></span>
-          </label>
-          <span style={{ fontWeight: 600, color: formData.isActive ? "#123c2a" : "#999" }}>
-            {formData.isActive ? "Active Member" : "Inactive"}
-          </span>
+            <span style={{ fontSize: "0.75rem", color: "#6b9e7e" }}>
+              Leave blank to use today&apos;s date for new members.
+            </span>
+          </div>
+          <div className="toggle-row">
+            <label className="toggle-switch">
+              <input
+                type="checkbox"
+                name="isActive"
+                checked={formData.isActive}
+                onChange={(e) => setFormData((prev) => ({ ...prev, isActive: e.target.checked }))}
+              />
+              <span className="slider"></span>
+            </label>
+            <span style={{ fontWeight: 600, color: formData.isActive ? "#123c2a" : "#999" }}>
+              {formData.isActive ? "Active Member" : "Inactive"}
+            </span>
+          </div>
         </div>
       </div>
 

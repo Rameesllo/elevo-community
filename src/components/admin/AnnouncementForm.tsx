@@ -86,7 +86,7 @@ export default function AnnouncementForm({ initialData = {}, isEditing = false }
 
   return (
     <form onSubmit={handleSubmit} className="announcement-form">
-      <style jsx>{`
+      <style>{`
         .announcement-form {
           display: flex;
           flex-direction: column;

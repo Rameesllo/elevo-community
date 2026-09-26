@@ -110,6 +110,7 @@ export async function registerMemberService(data: {
   institution?: string;
   skills?: string;
   image?: string;
+  joinedAt?: string;
 }) {
   const member = await prisma.member.create({
     data: {
@@ -123,6 +124,7 @@ export async function registerMemberService(data: {
       skills: data.skills || null,
       image: data.image || null,
       isActive: true,
+      ...(data.joinedAt ? { joinedAt: new Date(data.joinedAt) } : {}),
     } as any,
   });
   return { id: member.id, firstName: member.firstName, joinedAt: member.joinedAt, message: "Registration successful" };
@@ -141,6 +143,7 @@ export async function updateMemberService(
     skills?: string;
     image?: string;
     isActive?: boolean;
+    joinedAt?: string;
   }
 ) {
   const payload: any = {};
@@ -154,6 +157,8 @@ export async function updateMemberService(
   if (data.skills !== undefined) payload.skills = data.skills || null;
   if (data.image !== undefined) payload.image = data.image || null;
   if (data.isActive !== undefined) payload.isActive = data.isActive;
+
+  if (data.joinedAt) payload.joinedAt = new Date(data.joinedAt);
 
   return prisma.member.update({ where: { id }, data: payload });
 }

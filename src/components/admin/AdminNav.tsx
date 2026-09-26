@@ -11,7 +11,8 @@ import {
   Users,
   ShieldCheck,
   ExternalLink,
-  PlusCircle,
+  Megaphone,
+  UserCheck,
 } from "lucide-react";
 
 interface AdminNavProps {
@@ -40,8 +41,20 @@ export default function AdminNav({ user }: AdminNavProps) {
       active: pathname.startsWith("/admin/events"),
     },
     {
+      href: "/admin/members",
+      label: "Members",
+      icon: UserCheck,
+      active: pathname.startsWith("/admin/members"),
+    },
+    {
+      href: "/admin/announcements",
+      label: "Announcements",
+      icon: Megaphone,
+      active: pathname.startsWith("/admin/announcements"),
+    },
+    {
       href: "/admin/team",
-      label: "Team Directory",
+      label: "Team",
       icon: Users,
       active: pathname.startsWith("/admin/team"),
     },
