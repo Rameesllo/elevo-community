@@ -3,7 +3,7 @@ import bcrypt from "bcryptjs";
 import { cookies } from "next/headers";
 
 const JWT_SECRET = new TextEncoder().encode(
-  process.env.JWT_SECRET || "elevo-community-super-secret-jwt-key-2025"
+  process.env.JWT_SECRET || "fallback-secret-for-development-only"
 );
 
 export const COOKIE_NAME = "elevo_session";

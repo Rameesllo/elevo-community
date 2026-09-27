@@ -17,28 +17,20 @@ export async function getAnnouncementsService(filters?: {
       orderBy: { date: "desc" },
     });
 
-    if (rows.length > 0) {
-      return rows.map((a) => ({
-        id: a.id,
-        title: a.title,
-        date: a.date.toISOString().split("T")[0],
-        summary: a.summary,
-        content: a.content,
-        category: a.category as any,
-        important: a.important,
-        badge: a.badge || undefined,
-      }));
-    }
+    return rows.map((a) => ({
+      id: a.id,
+      title: a.title,
+      date: a.date.toISOString().split("T")[0],
+      summary: a.summary,
+      content: a.content,
+      category: a.category as any,
+      important: a.important,
+      badge: a.badge || undefined,
+    }));
   } catch (err) {
-    console.warn("getAnnouncements fallback:", (err as Error).message);
+    console.error("getAnnouncements error:", (err as Error).message);
+    return [];
   }
-
-  // Fallback to mock data (all treated as published for public site)
-  return MOCK_ANNOUNCEMENTS.filter((a) => {
-    if (filters?.category && filters.category !== "All" && a.category !== filters.category) return false;
-    if (filters?.important !== undefined && a.important !== filters.important) return false;
-    return true;
-  });
 }
 
 // Admin view — all announcements regardless of published status

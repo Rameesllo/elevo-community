@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { Heart, Users, Trophy, Leaf, Star, Award, ArrowRight, ShieldCheck } from "lucide-react";
 import { STATS } from "@/lib/constants";
-import { MOCK_TEAM } from "@/lib/mockData";
+
 
 export const metadata: Metadata = {
   title: "About",
@@ -19,8 +19,16 @@ const milestones = [
   { year: "2024", event: "Launched Elevo digital platform & career seminars" },
 ];
 
-export default function AboutPage() {
-  const leadershipPreview = MOCK_TEAM.slice(0, 6);
+import { prisma } from "@/lib/prisma";
+
+export default async function AboutPage() {
+  const leadershipPreview = await prisma.teamMember.findMany({
+    where: { isActive: true },
+    orderBy: { displayOrder: "asc" },
+    take: 6,
+  });
+  
+  const activeMembersCount = await prisma.member.count({ where: { isActive: true } });
 
   return (
     <div className="bg-white">
@@ -48,7 +56,9 @@ export default function AboutPage() {
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             {STATS.map((stat) => (
               <div key={stat.label} className="text-center py-4 bg-white rounded-2xl border border-border">
-                <div className="text-3xl font-bold text-forest">{stat.value}</div>
+                <div className="text-3xl font-bold text-forest">
+                  {stat.label === "Active Members" ? `${activeMembersCount}+` : stat.value}
+                </div>
                 <div className="text-xs text-muted mt-1 font-medium">{stat.label}</div>
               </div>
             ))}

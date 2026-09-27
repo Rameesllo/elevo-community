@@ -13,6 +13,7 @@ import {
   ExternalLink,
   Megaphone,
   UserCheck,
+  Bell,
 } from "lucide-react";
 
 interface AdminNavProps {
@@ -60,6 +61,15 @@ export default function AdminNav({ user }: AdminNavProps) {
     },
   ];
 
+  if (isAdmin) {
+    navLinks.push({
+      href: "/admin/accounts",
+      label: "Accounts",
+      icon: ShieldCheck,
+      active: pathname.startsWith("/admin/accounts"),
+    });
+  }
+
   return (
     <header className="bg-forest text-white border-b border-forest/20 sticky top-0 z-40 shadow-md">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -67,9 +77,9 @@ export default function AdminNav({ user }: AdminNavProps) {
           {/* Brand & Left Nav */}
           <div className="flex items-center gap-8">
             <Link href="/admin/dashboard" className="flex items-center gap-3 group">
-              <div className="w-9 h-9 bg-white/10 rounded-xl flex items-center justify-center p-1.5 border border-white/20 group-hover:scale-105 transition-transform">
+              <div className="w-9 h-9 bg-white rounded-xl flex items-center justify-center p-1.5 border border-white/20 group-hover:scale-105 transition-transform">
                 <Image
-                  src="/elevo-logo.png"
+                  src="/logo.png"
                   alt="Elevo Logo"
                   width={30}
                   height={30}
@@ -130,6 +140,14 @@ export default function AdminNav({ user }: AdminNavProps) {
                 {user.role}
               </span>
             </div>
+
+            <Link
+              href="/admin/notifications"
+              className="p-1.5 bg-white/10 hover:bg-white/20 rounded-full transition-colors relative"
+              title="Notifications"
+            >
+              <Bell className="w-4 h-4 text-mint-fog" />
+            </Link>
 
             <LogoutButton />
           </div>

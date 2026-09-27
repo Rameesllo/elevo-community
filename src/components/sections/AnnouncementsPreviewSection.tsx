@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { Bell, Calendar, ArrowRight, AlertCircle } from "lucide-react";
-import { MOCK_ANNOUNCEMENTS } from "@/lib/mockData";
+import { prisma } from "@/lib/prisma";
 import { Badge } from "@/components/ui/Badge";
 
 const categoryVariant: Record<string, "forest" | "default" | "outline"> = {
@@ -11,13 +11,16 @@ const categoryVariant: Record<string, "forest" | "default" | "outline"> = {
   General: "outline",
 };
 
-function formatDate(dateStr: string) {
-  const d = new Date(dateStr);
-  return d.toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" });
+function formatDate(date: Date) {
+  return date.toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" });
 }
 
-export function AnnouncementsPreviewSection() {
-  const latestAnnouncements = MOCK_ANNOUNCEMENTS.slice(0, 3);
+export async function AnnouncementsPreviewSection() {
+  const latestAnnouncements = await prisma.announcement.findMany({
+    where: { published: true },
+    orderBy: { date: "desc" },
+    take: 3,
+  });
 
   return (
     <section className="section bg-white border-b border-border">

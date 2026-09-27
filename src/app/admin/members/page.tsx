@@ -2,6 +2,7 @@ import Link from "next/link";
 import { getAllMembersAdminService } from "@/lib/services/members.service";
 import ToggleMemberActive from "@/components/admin/ToggleMemberActive";
 import DeleteMemberButton from "@/components/admin/DeleteMemberButton";
+import { UserCheck, PlusCircle } from "lucide-react";
 
 export const dynamic = "force-dynamic";
 
@@ -12,243 +13,141 @@ export default async function AdminMembersPage() {
   const inactiveCount = members.length - activeCount;
 
   return (
-    <div style={{ minHeight: "100vh", background: "#f0faf5", fontFamily: "system-ui, sans-serif" }}>
+    <div className="px-4 sm:px-6 lg:px-8 py-8 max-w-7xl mx-auto space-y-6">
       {/* Header */}
-      <div
-        style={{
-          background: "linear-gradient(135deg, #123c2a 0%, #1a5c3f 100%)",
-          padding: "1.5rem 2rem",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
-          gap: "1rem",
-          flexWrap: "wrap",
-        }}
-      >
-        <div style={{ display: "flex", alignItems: "center", gap: "1rem" }}>
-          <Link href="/admin/dashboard" style={{ color: "#a7d7b8", textDecoration: "none", fontSize: "0.875rem" }}>
-            ← Dashboard
-          </Link>
-          <span style={{ color: "#a7d7b8" }}>|</span>
-          <h1 style={{ margin: 0, color: "white", fontSize: "1.375rem", fontWeight: 700 }}>
-            👥 Members Management
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-6 rounded-3xl border border-forest/10 shadow-sm">
+        <div>
+          <h1 className="text-xl sm:text-2xl font-black text-forest flex items-center gap-2.5">
+            <UserCheck className="w-6 h-6 text-forest" />
+            Members Management
           </h1>
+          <p className="text-xs text-dark-text/70 mt-1">
+            View, activate, edit and manage all community members.
+          </p>
         </div>
         <Link
           href="/admin/members/create"
-          style={{
-            padding: "0.625rem 1.25rem",
-            background: "#e8f5ef",
-            color: "#123c2a",
-            borderRadius: "8px",
-            textDecoration: "none",
-            fontWeight: 700,
-            fontSize: "0.9rem",
-          }}
+          className="px-4 py-2.5 bg-forest hover:bg-forest/90 text-white text-xs font-bold rounded-xl transition-all shadow-sm flex items-center justify-center gap-2 cursor-pointer shrink-0"
         >
-          ➕ Add Member
+          <PlusCircle className="w-4 h-4" />
+          <span>Add Member</span>
         </Link>
       </div>
 
-      <div style={{ padding: "2rem", maxWidth: "1200px", margin: "0 auto" }}>
-        {/* Stats */}
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(160px, 1fr))", gap: "1rem", marginBottom: "2rem" }}>
-          {[
-            { label: "Total Members", value: members.length, color: "#123c2a", bg: "#e8f5ef" },
-            { label: "Active", value: activeCount, color: "#059669", bg: "#d1fae5" },
-            { label: "Inactive", value: inactiveCount, color: "#dc2626", bg: "#fee2e2" },
-          ].map((stat) => (
-            <div
-              key={stat.label}
-              style={{
-                background: stat.bg,
-                borderRadius: "12px",
-                padding: "1.25rem 1.5rem",
-                border: `1px solid ${stat.color}30`,
-              }}
-            >
-              <div style={{ fontSize: "1.875rem", fontWeight: 800, color: stat.color }}>{stat.value}</div>
-              <div style={{ fontSize: "0.8125rem", fontWeight: 600, color: stat.color, opacity: 0.8 }}>{stat.label}</div>
-            </div>
-          ))}
-        </div>
-
-        {/* Table */}
-        <div
-          style={{
-            background: "white",
-            borderRadius: "16px",
-            border: "1px solid #c8e6d5",
-            overflow: "hidden",
-            boxShadow: "0 2px 12px rgba(18,60,42,0.06)",
-          }}
-        >
-          <div style={{ padding: "1.25rem 1.5rem", borderBottom: "1px solid #e8f5ef", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-            <h2 style={{ margin: 0, fontSize: "1rem", fontWeight: 700, color: "#123c2a" }}>All Members</h2>
-            <span style={{ fontSize: "0.8125rem", color: "#6b9e7e" }}>
-              ⚠️ Private data — visible to admins only
-            </span>
+      {/* Stats */}
+      <div className="grid grid-cols-3 gap-4">
+        {[
+          { label: "Total Members", value: members.length, color: "text-forest", bg: "bg-mint-fog/50 border-forest/10" },
+          { label: "Active", value: activeCount, color: "text-emerald-700", bg: "bg-emerald-50 border-emerald-200" },
+          { label: "Inactive", value: inactiveCount, color: "text-red-600", bg: "bg-red-50 border-red-200" },
+        ].map((stat) => (
+          <div key={stat.label} className={`${stat.bg} border rounded-2xl p-5`}>
+            <div className={`text-3xl font-black ${stat.color}`}>{stat.value}</div>
+            <div className={`text-xs font-semibold mt-1 ${stat.color} opacity-80`}>{stat.label}</div>
           </div>
+        ))}
+      </div>
 
-          {members.length === 0 ? (
-            <div style={{ padding: "3rem", textAlign: "center", color: "#6b9e7e" }}>
-              <div style={{ fontSize: "3rem", marginBottom: "0.75rem" }}>👥</div>
-              <div style={{ fontWeight: 600 }}>No members yet</div>
-              <Link href="/admin/members/create" style={{ color: "#123c2a", fontWeight: 700, marginTop: "0.5rem", display: "inline-block" }}>
-                + Add first member
-              </Link>
-            </div>
-          ) : (
-            <div style={{ overflowX: "auto" }}>
-              <table style={{ width: "100%", borderCollapse: "collapse" }}>
-                <thead>
-                  <tr style={{ background: "#f8fdf9", borderBottom: "1px solid #e8f5ef" }}>
-                    {["Member", "Contact", "Education", "Skills", "Joined", "Status", "Actions"].map((h) => (
-                      <th
-                        key={h}
-                        style={{
-                          padding: "0.75rem 1rem",
-                          textAlign: "left",
-                          fontSize: "0.75rem",
-                          fontWeight: 700,
-                          color: "#2d5a3d",
-                          textTransform: "uppercase",
-                          letterSpacing: "0.05em",
-                          whiteSpace: "nowrap",
-                        }}
-                      >
-                        {h}
-                      </th>
-                    ))}
-                  </tr>
-                </thead>
-                <tbody>
-                  {members.map((member, i) => {
-                    const initials = `${member.firstName[0] || ""}${member.lastName[0] || ""}`.toUpperCase();
-                    return (
-                      <tr
-                        key={member.id}
-                        style={{
-                          borderBottom: i < members.length - 1 ? "1px solid #f0faf5" : "none",
-                          transition: "background 0.15s",
-                        }}
-                        onMouseEnter={(e) => (e.currentTarget.style.background = "#f8fdf9")}
-                        onMouseLeave={(e) => (e.currentTarget.style.background = "transparent")}
-                      >
-                        <td style={{ padding: "0.875rem 1rem" }}>
-                          <div style={{ display: "flex", alignItems: "center", gap: "0.75rem" }}>
-                            {member.image ? (
-                              <img
-                                src={member.image}
-                                alt={member.firstName}
-                                style={{ width: 36, height: 36, borderRadius: "50%", objectFit: "cover", border: "2px solid #c8e6d5" }}
-                              />
-                            ) : (
-                              <div
-                                style={{
-                                  width: 36,
-                                  height: 36,
-                                  borderRadius: "50%",
-                                  background: "linear-gradient(135deg, #123c2a, #1a5c3f)",
-                                  color: "white",
-                                  display: "flex",
-                                  alignItems: "center",
-                                  justifyContent: "center",
-                                  fontWeight: 700,
-                                  fontSize: "0.75rem",
-                                }}
-                              >
-                                {initials}
-                              </div>
-                            )}
-                            <div>
-                              <div style={{ fontWeight: 700, color: "#1a1a1a", fontSize: "0.9rem" }}>
-                                {member.firstName} {member.lastName}
-                              </div>
-                              {member.address && (
-                                <div style={{ fontSize: "0.75rem", color: "#6b9e7e", maxWidth: 160, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-                                  {member.address}
-                                </div>
-                              )}
-                            </div>
-                          </div>
-                        </td>
-                        <td style={{ padding: "0.875rem 1rem" }}>
-                          {member.email && <div style={{ fontSize: "0.8rem", color: "#374151" }}>{member.email}</div>}
-                          {member.phone && <div style={{ fontSize: "0.8rem", color: "#6b9e7e" }}>{member.phone}</div>}
-                          {!member.email && !member.phone && <span style={{ color: "#ccc" }}>—</span>}
-                        </td>
-                        <td style={{ padding: "0.875rem 1rem" }}>
-                          <div style={{ fontSize: "0.8rem", color: "#374151", fontWeight: 500 }}>{member.educationLevel || "—"}</div>
-                          {member.institution && (
-                            <div style={{ fontSize: "0.75rem", color: "#6b9e7e" }}>{member.institution}</div>
-                          )}
-                        </td>
-                        <td style={{ padding: "0.875rem 1rem", maxWidth: 160 }}>
-                          {member.skills ? (
-                            <div style={{ display: "flex", flexWrap: "wrap", gap: "0.25rem" }}>
-                              {member.skills
-                                .split(",")
-                                .slice(0, 3)
-                                .map((s) => (
-                                  <span
-                                    key={s}
-                                    style={{
-                                      padding: "0.15rem 0.5rem",
-                                      background: "#e8f5ef",
-                                      color: "#123c2a",
-                                      borderRadius: "999px",
-                                      fontSize: "0.7rem",
-                                      fontWeight: 600,
-                                    }}
-                                  >
-                                    {s.trim()}
-                                  </span>
-                                ))}
-                              {member.skills.split(",").length > 3 && (
-                                <span style={{ fontSize: "0.7rem", color: "#6b9e7e" }}>
-                                  +{member.skills.split(",").length - 3}
-                                </span>
-                              )}
-                            </div>
-                          ) : (
-                            <span style={{ color: "#ccc" }}>—</span>
-                          )}
-                        </td>
-                        <td style={{ padding: "0.875rem 1rem" }}>
-                          <span style={{ fontSize: "0.8rem", color: "#6b9e7e", whiteSpace: "nowrap" }}>{member.joinedAt}</span>
-                        </td>
-                        <td style={{ padding: "0.875rem 1rem" }}>
-                          <ToggleMemberActive id={member.id} isActive={member.isActive} />
-                        </td>
-                        <td style={{ padding: "0.875rem 1rem" }}>
-                          <div style={{ display: "flex", gap: "0.5rem", alignItems: "center" }}>
-                            <Link
-                              href={`/admin/members/${member.id}/edit`}
-                              style={{
-                                padding: "0.375rem 0.75rem",
-                                background: "#e8f5ef",
-                                color: "#123c2a",
-                                border: "1px solid #a7d7b8",
-                                borderRadius: "6px",
-                                fontSize: "0.8rem",
-                                textDecoration: "none",
-                                fontWeight: 600,
-                              }}
-                            >
-                              Edit
-                            </Link>
-                            <DeleteMemberButton id={member.id} name={`${member.firstName} ${member.lastName}`} />
-                          </div>
-                        </td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
-            </div>
-          )}
+      {/* Table */}
+      <div className="bg-white rounded-3xl border border-forest/10 shadow-sm overflow-hidden">
+        <div className="px-6 py-4 border-b border-forest/10 flex items-center justify-between">
+          <h2 className="text-sm font-bold text-forest">All Members</h2>
+          <span className="text-xs text-dark-text/50">⚠️ Private data — admins only</span>
         </div>
+
+        {members.length === 0 ? (
+          <div className="p-12 text-center text-dark-text/60">
+            <div className="text-5xl mb-3">👥</div>
+            <div className="font-semibold text-sm">No members yet</div>
+            <Link href="/admin/members/create" className="text-forest font-bold mt-2 inline-block text-xs">
+              + Add first member
+            </Link>
+          </div>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="w-full text-left border-collapse text-xs">
+              <thead>
+                <tr className="bg-mint-fog/60 border-b border-forest/10 text-dark-text/70 uppercase tracking-wider font-bold">
+                  {["Member", "Contact", "Education", "Skills", "Joined", "Status", "Actions"].map((h) => (
+                    <th key={h} className="py-4 px-4 whitespace-nowrap">{h}</th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-forest/10 font-medium text-dark-text">
+                {members.map((member) => {
+                  const initials = `${member.firstName[0] || ""}${member.lastName[0] || ""}`.toUpperCase();
+                  return (
+                    <tr key={member.id} className="hover:bg-mint-fog/20 transition-colors">
+                      <td className="py-4 px-4">
+                        <div className="flex items-center gap-3">
+                          {member.image ? (
+                            <img
+                              src={member.image}
+                              alt={member.firstName}
+                              className="w-9 h-9 rounded-full object-cover border-2 border-forest/20"
+                            />
+                          ) : (
+                            <div className="w-9 h-9 rounded-full bg-gradient-to-br from-[#123c2a] to-[#1a5c3f] text-white flex items-center justify-center font-bold text-xs">
+                              {initials}
+                            </div>
+                          )}
+                          <div>
+                            <div className="font-bold text-dark-text">
+                              {member.firstName} {member.lastName}
+                            </div>
+                            {member.address && (
+                              <div className="text-[11px] text-dark-text/50 max-w-[140px] truncate">{member.address}</div>
+                            )}
+                          </div>
+                        </div>
+                      </td>
+                      <td className="py-4 px-4">
+                        {member.email && <div className="text-dark-text">{member.email}</div>}
+                        {member.phone && <div className="text-dark-text/60">{member.phone}</div>}
+                        {!member.email && !member.phone && <span className="text-gray-400">—</span>}
+                      </td>
+                      <td className="py-4 px-4">
+                        <div className="font-medium">{member.educationLevel || "—"}</div>
+                        {member.institution && <div className="text-dark-text/60 text-[11px]">{member.institution}</div>}
+                      </td>
+                      <td className="py-4 px-4 max-w-[160px]">
+                        {member.skills ? (
+                          <div className="flex flex-wrap gap-1">
+                            {member.skills.split(",").slice(0, 3).map((s) => (
+                              <span key={s} className="px-2 py-0.5 bg-mint-fog text-forest rounded-full text-[10px] font-semibold">
+                                {s.trim()}
+                              </span>
+                            ))}
+                            {member.skills.split(",").length > 3 && (
+                              <span className="text-[11px] text-dark-text/50">+{member.skills.split(",").length - 3}</span>
+                            )}
+                          </div>
+                        ) : (
+                          <span className="text-gray-400">—</span>
+                        )}
+                      </td>
+                      <td className="py-4 px-4 whitespace-nowrap text-dark-text/60">{member.joinedAt}</td>
+                      <td className="py-4 px-4">
+                        <ToggleMemberActive id={member.id} isActive={member.isActive} />
+                      </td>
+                      <td className="py-4 px-4">
+                        <div className="flex gap-2 items-center">
+                          <Link
+                            href={`/admin/members/${member.id}/edit`}
+                            className="px-3 py-1.5 bg-mint-fog/60 hover:bg-mint-fog text-forest border border-forest/20 rounded-xl text-xs font-bold transition-colors"
+                          >
+                            Edit
+                          </Link>
+                          <DeleteMemberButton id={member.id} name={`${member.firstName} ${member.lastName}`} />
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        )}
       </div>
     </div>
   );

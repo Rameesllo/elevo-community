@@ -1,8 +1,11 @@
 import Link from "next/link";
 import { ArrowRight, Users, CalendarDays, MapPin } from "lucide-react";
 import { SITE_TAGLINE, STATS } from "@/lib/constants";
+import { prisma } from "@/lib/prisma";
 
-export function HeroSection() {
+export async function HeroSection() {
+  const activeMembersCount = await prisma.member.count({ where: { isActive: true } });
+
   return (
     <section className="relative overflow-hidden bg-white">
       {/* Subtle background accent */}
@@ -55,7 +58,9 @@ export function HeroSection() {
         <div className="mt-16 md:mt-20 grid grid-cols-2 md:grid-cols-4 gap-4 animate-fade-up" style={{ animationDelay: "320ms" }}>
           {STATS.map((stat) => (
             <div key={stat.label} className="card-flat text-center py-5">
-              <div className="text-3xl font-bold text-forest">{stat.value}</div>
+              <div className="text-3xl font-bold text-forest">
+                {stat.label === "Active Members" ? `${activeMembersCount}+` : stat.value}
+              </div>
               <div className="text-xs text-muted mt-1 font-medium">{stat.label}</div>
             </div>
           ))}

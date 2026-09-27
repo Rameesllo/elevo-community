@@ -1,10 +1,13 @@
 import Link from "next/link";
 import { ArrowRight, ShieldCheck, Mail, Users } from "lucide-react";
-import { MOCK_TEAM } from "@/lib/mockData";
+import { prisma } from "@/lib/prisma";
 
-export function TeamPreviewSection() {
-  // Show key office bearers and coordinators on home preview
-  const previewMembers = MOCK_TEAM.slice(0, 4);
+export async function TeamPreviewSection() {
+  const previewMembers = await prisma.teamMember.findMany({
+    where: { isActive: true },
+    orderBy: { displayOrder: "asc" },
+    take: 4,
+  });
 
   return (
     <section className="section bg-white border-b border-border">

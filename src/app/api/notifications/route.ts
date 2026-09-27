@@ -1,7 +1,8 @@
 import { NextRequest } from "next/server";
 import { apiSuccess, apiError } from "@/lib/api-response";
 import { getAdminNotificationsService, createAdminNotificationService } from "@/lib/services/notifications.service";
-import { createNotificationSchema } from "@/lib/validations";
+import { getAuthSession } from "@/lib/auth";
+import { prisma } from "@/lib/prisma";
 
 export async function GET(request: NextRequest) {
   try {
@@ -17,19 +18,39 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
+    const session = await getAuthSession();
+    if (!session) return apiError("Unauthorized", 401);
+
     const body = await request.json();
-    const validatedData = createNotificationSchema.parse(body);
+    if (!body.adminId || !body.message) return apiError("Missing adminId or message", 400);
 
-    const notification = await createAdminNotificationService(
-      validatedData.adminId,
-      validatedData.message
-    );
-
+    const notification = await createAdminNotificationService(body.adminId, body.message);
     return apiSuccess(notification, 201);
   } catch (error: any) {
-    if (error?.name === "ZodError") {
-      return apiError("Validation error", 400, error.errors);
-    }
-    return apiError("Failed to create notification", 500, error?.message || error);
+    return apiError("Failed to create notification", 500, error?.message);
   }
 }
+
+export async function PATCH(request: NextRequest) {
+  try {
+    const session = await getAuthSession();
+    if (!session) return apiError("Unauthorized", 401);
+
+    const body = await request.json();
+    if (body.action === "markAllRead") {
+      const { searchParams } = new URL(request.url);
+      const adminId = searchParams.get("adminId");
+      if (!adminId) return apiError("Missing adminId", 400);
+      
+      await prisma.adminNotification.updateMany({
+        where: { adminId, read: false },
+        data: { read: true },
+      });
+      return apiSuccess({ message: "All marked as read" });
+    }
+    return apiError("Invalid action", 400);
+  } catch (error: any) {
+    return apiError("Failed to update notifications", 500, error?.message);
+  }
+}
+

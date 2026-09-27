@@ -115,7 +115,7 @@ function LoginForm() {
         <p className="text-[11px] font-semibold text-dark-text/60 uppercase tracking-wider text-center mb-3">
           Quick Account Select (Demo)
         </p>
-        <div className="grid grid-cols-2 gap-2 text-xs">
+        <div className="grid grid-cols-1 gap-2 text-xs">
           <button
             type="button"
             onClick={() => handleQuickFill("admin@elevo.org", "Admin@1234")}
@@ -125,17 +125,6 @@ function LoginForm() {
               <ShieldCheck className="w-3 h-3 text-forest" /> Admin
             </span>
             <span className="text-[10px] text-dark-text/60">admin@elevo.org</span>
-          </button>
-
-          <button
-            type="button"
-            onClick={() => handleQuickFill("manager@elevo.org", "Manager@1234")}
-            className="p-2.5 bg-mint-fog/50 hover:bg-mint-fog border border-forest/10 rounded-xl text-forest font-medium text-left transition-colors flex flex-col cursor-pointer"
-          >
-            <span className="font-bold text-dark-text flex items-center gap-1">
-              <ShieldCheck className="w-3 h-3 text-emerald-600" /> Manager
-            </span>
-            <span className="text-[10px] text-dark-text/60">manager@elevo.org</span>
           </button>
         </div>
       </div>
@@ -151,9 +140,9 @@ export default function AdminLoginPage() {
         <div className="bg-forest text-white p-8 text-center relative overflow-hidden">
           <div className="absolute -top-12 -right-12 w-32 h-32 bg-white/10 rounded-full blur-2xl" />
           <div className="flex justify-center mb-4">
-            <div className="w-16 h-16 bg-white/10 backdrop-blur-md rounded-2xl flex items-center justify-center p-3 border border-white/20">
+            <div className="w-16 h-16 bg-white rounded-2xl flex items-center justify-center p-3 border border-white/20">
               <Image
-                src="/elevo-logo.png"
+                src="/logo.png"
                 alt="Elevo Logo"
                 width={48}
                 height={48}

@@ -23,6 +23,10 @@ export async function POST(request: NextRequest) {
       return apiError("Invalid email or password", 401);
     }
 
+    if (!admin.isActive) {
+      return apiError("Your account has been deactivated. Please contact an administrator.", 403);
+    }
+
     // 2. Verify password
     const isPasswordValid = await verifyPassword(password, admin.passwordHash);
     if (!isPasswordValid) {

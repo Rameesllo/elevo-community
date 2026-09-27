@@ -28,39 +28,24 @@ export async function getEventsService(filters?: {
       orderBy: { date: "desc" },
     });
 
-    if (events.length > 0) {
-      return events.map((e) => ({
-        id: e.id,
-        title: e.title,
-        date: e.date.toISOString().split("T")[0],
-        time: e.time || undefined,
-        location: e.location,
-        meetingLink: (e as any).meetingLink || undefined,
-        description: e.description,
-        category: e.category as any,
-        status: ((e as any).status || (e.upcoming ? "UPCOMING" : "COMPLETED")) as any,
-        upcoming: e.upcoming,
-        featured: e.featured,
-        image: e.image || undefined,
-      }));
-    }
+    return events.map((e) => ({
+      id: e.id,
+      title: e.title,
+      date: e.date.toISOString().split("T")[0],
+      time: e.time || undefined,
+      location: e.location,
+      meetingLink: (e as any).meetingLink || undefined,
+      description: e.description,
+      category: e.category as any,
+      status: ((e as any).status || (e.upcoming ? "UPCOMING" : "COMPLETED")) as any,
+      upcoming: e.upcoming,
+      featured: e.featured,
+      image: e.image || undefined,
+    }));
   } catch (err) {
-    console.warn("Database connection unavailable for events, falling back to initial data:", (err as Error).message);
+    console.error("Database connection error for getEventsService:", (err as Error).message);
+    return [];
   }
-
-  // Fallback to initial mock data filtered
-  return MOCK_EVENTS.filter((e) => {
-    if (filters?.category && filters.category !== "All" && e.category.toLowerCase() !== filters.category.toLowerCase()) {
-      return false;
-    }
-    if (filters?.upcoming !== undefined && e.upcoming !== filters.upcoming) {
-      return false;
-    }
-    if (filters?.featured !== undefined && e.featured !== filters.featured) {
-      return false;
-    }
-    return true;
-  });
 }
 
 export async function getEventByIdService(id: string): Promise<Event | null> {
@@ -82,11 +67,11 @@ export async function getEventByIdService(id: string): Promise<Event | null> {
         image: event.image || undefined,
       };
     }
+    return null;
   } catch (err) {
-    console.warn("Database error in getEventById, falling back to mock:", (err as Error).message);
+    console.error("Database error in getEventById:", (err as Error).message);
+    return null;
   }
-
-  return MOCK_EVENTS.find((e) => e.id === id) || null;
 }
 
 export async function createEventService(data: {
@@ -167,8 +152,11 @@ export async function updateEventService(
       data: updatePayload,
     });
     return updatedEvent;
-  } catch (err) {
+  } catch (err: any) {
     console.error("Failed to update event in DB:", err);
+    if (err.code === 'P2025') {
+      throw new Error("Event not found");
+    }
     throw new Error("Could not update event");
   }
 }
@@ -178,8 +166,11 @@ export async function deleteEventService(id: string) {
     return await prisma.event.delete({
       where: { id },
     });
-  } catch (err) {
+  } catch (err: any) {
     console.error("Failed to delete event from DB:", err);
+    if (err.code === 'P2025') {
+      throw new Error("Event not found");
+    }
     throw new Error("Could not delete event");
   }
 }

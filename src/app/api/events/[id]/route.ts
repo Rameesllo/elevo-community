@@ -41,6 +41,9 @@ export async function PUT(
     if (error?.name === "ZodError") {
       return apiError("Validation error", 400, error.errors);
     }
+    if (error?.message === "Event not found") {
+      return apiError("Event not found", 404);
+    }
     return apiError("Failed to update event", 500, error?.message || error);
   }
 }
@@ -56,6 +59,9 @@ export async function DELETE(
     await deleteEventService(id);
     return apiSuccess({ message: "Event deleted successfully" });
   } catch (error: any) {
+    if (error?.message === "Event not found") {
+      return apiError("Event not found", 404);
+    }
     return apiError("Failed to delete event", 500, error?.message || error);
   }
 }

@@ -20,35 +20,24 @@ export async function getTeamMembersService(filters?: {
       orderBy: [{ displayOrder: "asc" }, { name: "asc" }],
     });
 
-    if (members.length > 0) {
-      return members.map((m) => ({
-        id: m.id,
-        name: m.name,
-        role: m.role,
-        department: m.department as any,
-        bio: m.bio,
-        email: m.email || undefined,
-        phone: m.phone || undefined,
-        initials: m.initials,
-        badge: m.badge || undefined,
-        image: (m as any).image || undefined,
-        isActive: (m as any).isActive ?? true,
-        displayOrder: (m as any).displayOrder ?? 0,
-      }));
-    }
+    return members.map((m) => ({
+      id: m.id,
+      name: m.name,
+      role: m.role,
+      department: m.department as any,
+      bio: m.bio,
+      email: m.email || undefined,
+      phone: m.phone || undefined,
+      initials: m.initials,
+      badge: m.badge || undefined,
+      image: (m as any).image || undefined,
+      isActive: (m as any).isActive ?? true,
+      displayOrder: (m as any).displayOrder ?? 0,
+    }));
   } catch (err) {
-    console.warn("Database unavailable for getTeamMembers, using fallback data:", (err as Error).message);
+    console.error("Database error in getTeamMembers:", (err as Error).message);
+    return [];
   }
-
-  return MOCK_TEAM.filter((m) => {
-    if (filters?.department && filters.department !== "All" && m.department.toLowerCase() !== filters.department.toLowerCase()) {
-      return false;
-    }
-    if (filters?.isActive !== undefined && (m.isActive ?? true) !== filters.isActive) {
-      return false;
-    }
-    return true;
-  });
 }
 
 export async function getTeamMemberByIdService(id: string): Promise<TeamMember | null> {
@@ -70,11 +59,11 @@ export async function getTeamMemberByIdService(id: string): Promise<TeamMember |
         displayOrder: (member as any).displayOrder ?? 0,
       };
     }
+    return null;
   } catch (err) {
-    console.warn("Database error in getTeamMemberById, falling back to mock:", (err as Error).message);
+    console.error("Database error in getTeamMemberById:", (err as Error).message);
+    return null;
   }
-
-  return MOCK_TEAM.find((m) => m.id === id) || null;
 }
 
 export async function createTeamMemberService(data: {

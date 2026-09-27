@@ -2,12 +2,12 @@ import { NextRequest, NextResponse } from "next/server";
 import { jwtVerify } from "jose";
 
 const JWT_SECRET = new TextEncoder().encode(
-  process.env.JWT_SECRET || "elevo-community-super-secret-jwt-key-2025"
+  process.env.JWT_SECRET || "fallback-secret-for-development-only"
 );
 
 const COOKIE_NAME = "elevo_session";
 
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   // Only handle /admin routes

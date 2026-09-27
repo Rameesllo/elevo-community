@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { CalendarDays, MapPin, Clock, ArrowRight } from "lucide-react";
 import { Badge } from "@/components/ui/Badge";
-import { MOCK_EVENTS } from "@/lib/mockData";
+import { prisma } from "@/lib/prisma";
 
 const categoryColors: Record<string, "default" | "forest" | "outline"> = {
   sports: "forest",
@@ -19,13 +19,16 @@ const categoryLabels: Record<string, string> = {
   other: "Other",
 };
 
-function formatDate(dateStr: string) {
-  const d = new Date(dateStr);
-  return d.toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" });
+function formatDate(date: Date) {
+  return date.toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" });
 }
 
-export function EventsSection() {
-  const upcomingEvents = MOCK_EVENTS.filter((e) => e.upcoming).slice(0, 3);
+export async function EventsSection() {
+  const upcomingEvents = await prisma.event.findMany({
+    where: { upcoming: true },
+    orderBy: { date: "asc" },
+    take: 3,
+  });
 
   return (
     <section className="section bg-white border-b border-border">
