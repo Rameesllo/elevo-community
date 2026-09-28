@@ -11,7 +11,6 @@ import {
   Layers,
   Mail,
   Phone,
-  FileText,
   Upload,
   CheckCircle2,
   AlertCircle,
@@ -36,15 +35,22 @@ export default function TeamMemberForm({
 
   const [name, setName] = useState(initialData?.name || "");
   const [role, setRole] = useState(initialData?.role || "");
+  const legacyMap: Record<string, string> = {
+    "Executive Committee": "Current Team",
+    "Office Bearers": "Current Team",
+    "Program Coordinators": "Current Team",
+    "Youth Wing": "Current Team",
+  };
   const [department, setDepartment] = useState(
-    initialData?.department || "Office Bearers"
+    (initialData?.department && legacyMap[initialData.department]) || initialData?.department || "Current Team"
   );
-  const [bio, setBio] = useState(initialData?.bio || "");
   const [email, setEmail] = useState(initialData?.email || "");
   const [phone, setPhone] = useState(initialData?.phone || "");
   const [initials, setInitials] = useState(initialData?.initials || "");
   const [badge, setBadge] = useState(initialData?.badge || "");
   const [image, setImage] = useState(initialData?.image || "");
+  const [linkedin, setLinkedin] = useState((initialData as any)?.linkedin || "");
+  const [instagram, setInstagram] = useState((initialData as any)?.instagram || "");
   const [isActive, setIsActive] = useState(initialData?.isActive ?? true);
   const [displayOrder, setDisplayOrder] = useState(initialData?.displayOrder ?? 0);
 
@@ -102,12 +108,14 @@ export default function TeamMemberForm({
       name,
       role,
       department,
-      bio,
+      bio: null,
       email: email || null,
       phone: phone || null,
       initials: autoInitials,
       badge: badge || null,
       image: image || null,
+      linkedin: linkedin || null,
+      instagram: instagram || null,
       isActive,
       displayOrder: Number(displayOrder) || 0,
     };
@@ -317,17 +325,16 @@ export default function TeamMemberForm({
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label className="block text-xs font-bold text-dark-text uppercase tracking-wider mb-2 flex items-center gap-1.5">
-                <Layers className="w-3.5 h-3.5 text-forest" /> Department *
+                <Layers className="w-3.5 h-3.5 text-forest" /> Layer / Team Group *
               </label>
               <select
                 value={department}
                 onChange={(e) => setDepartment(e.target.value as any)}
                 className="w-full px-4 py-3 bg-mint-fog/30 border border-forest/15 rounded-xl text-sm font-medium text-dark-text focus:outline-none focus:ring-2 focus:ring-forest focus:bg-white transition-all cursor-pointer"
               >
-                <option value="Executive Committee">Executive Committee</option>
-                <option value="Office Bearers">Office Bearers</option>
-                <option value="Program Coordinators">Program Coordinators</option>
-                <option value="Youth Wing">Youth Wing</option>
+                <option value="Founders">Founders — Layer 1</option>
+                <option value="Current Team">Current Team — Layer 2</option>
+                <option value="Alumni">Alumni — Layer 3</option>
               </select>
             </div>
 
@@ -374,6 +381,39 @@ export default function TeamMemberForm({
             </div>
           </div>
 
+          {/* LinkedIn & Instagram */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-xs font-bold text-dark-text uppercase tracking-wider mb-2 flex items-center gap-1.5">
+                <span className="w-3.5 h-3.5 text-forest flex items-center justify-center">
+                  <svg viewBox="0 0 24 24" className="w-3.5 h-3.5 fill-current"><path d="M19 0h-14c-2.76 0-5 2.24-5 5v14c0 2.76 2.24 5 5 5h14c2.76 0 5-2.24 5-5v-14c0-2.76-2.24-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.27c-.96 0-1.74-.79-1.74-1.76s.78-1.76 1.74-1.76 1.74.79 1.74 1.76-.78 1.76-1.74 1.76zm15.5 12.27h-3v-5.6c0-1.34-.03-3.06-1.86-3.06-1.86 0-2.15 1.45-2.15 2.95v5.71h-3s.04-9.26 0-11h3v1.56c.4-.62 1.11-1.5 2.71-1.5 1.98 0 3.47 1.29 3.47 4.06v6.88z"/></svg>
+                </span> LinkedIn URL (Optional)
+              </label>
+              <input
+                type="url"
+                value={linkedin}
+                onChange={(e) => setLinkedin(e.target.value)}
+                placeholder="https://linkedin.com/in/username"
+                className="w-full px-4 py-3 bg-mint-fog/30 border border-forest/15 rounded-xl text-sm font-medium text-dark-text placeholder:text-forest/30 focus:outline-none focus:ring-2 focus:ring-forest focus:bg-white transition-all"
+              />
+            </div>
+
+            <div>
+              <label className="block text-xs font-bold text-dark-text uppercase tracking-wider mb-2 flex items-center gap-1.5">
+                <span className="w-3.5 h-3.5 text-forest flex items-center justify-center">
+                  <svg viewBox="0 0 24 24" className="w-3.5 h-3.5 fill-current"><path d="M12 2.16c3.2 0 3.58.01 4.85.07 1.17.05 1.8.25 2.22.41.56.22.96.48 1.38.9.42.42.68.82.9 1.38.16.42.36 1.05.41 2.22.06 1.27.07 1.65.07 4.85s-.01 3.58-.07 4.85c-.05 1.17-.25 1.8-.41 2.22a3.7 3.7 0 01-.9 1.38 3.7 3.7 0 01-1.38.9c-.42.16-1.05.36-2.22.41-1.27.06-1.65.07-4.85.07s-3.58-.01-4.85-.07c-1.17-.05-1.8-.25-2.22-.41a3.7 3.7 0 01-1.38-.9 3.7 3.7 0 01-.9-1.38c-.16-.42-.36-1.05-.41-2.22C2.17 15.58 2.16 15.2 2.16 12s.01-3.58.07-4.85c.05-1.17.25-1.8.41-2.22.22-.56.48-.96.9-1.38.42-.42.82-.68 1.38-.9.42-.16 1.05-.36 2.22-.41C8.42 2.17 8.8 2.16 12 2.16zm0 1.8c-3.15 0-3.52.01-4.77.07-1.08.05-1.67.23-2.06.38-.52.2-.89.44-1.28.83-.39.39-.63.76-.83 1.28-.15.39-.33.98-.38 2.06C2.65 8.83 2.64 9.2 2.64 12s.01 3.17.07 4.42c.05 1.08.23 1.67.38 2.06.2.52.44.89.83 1.28.39.39.76.63 1.28.83.39.15.98.33 2.06.38 1.25.06 1.62.07 4.77.07s3.52-.01 4.77-.07c1.08-.05 1.67-.23 2.06-.38.52-.2.89-.44 1.28-.83.39-.39.63-.76.83-1.28.15-.39.33-.98.38-2.06.06-1.25.07-1.62.07-4.42s-.01-3.17-.07-4.42c-.05-1.08-.23-1.67-.38-2.06a2.7 2.7 0 00-.83-1.28 2.7 2.7 0 00-1.28-.83c-.39-.15-.98-.33-2.06-.38C15.52 3.97 15.15 3.96 12 3.96zm0 3.06a5.98 5.98 0 110 11.96 5.98 5.98 0 010-11.96zm0 1.8a4.18 4.18 0 100 8.36 4.18 4.18 0 000-8.36zm6.23-2.59a1.4 1.4 0 110 2.8 1.4 1.4 0 010-2.8z"/></svg>
+                </span> Instagram URL (Optional)
+              </label>
+              <input
+                type="url"
+                value={instagram}
+                onChange={(e) => setInstagram(e.target.value)}
+                placeholder="https://instagram.com/username"
+                className="w-full px-4 py-3 bg-mint-fog/30 border border-forest/15 rounded-xl text-sm font-medium text-dark-text placeholder:text-forest/30 focus:outline-none focus:ring-2 focus:ring-forest focus:bg-white transition-all"
+              />
+            </div>
+          </div>
+
           {/* Display Order & Active Toggle */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 items-center bg-mint-fog/20 p-4 rounded-2xl border border-forest/10">
             <div>
@@ -409,21 +449,6 @@ export default function TeamMemberForm({
                 </div>
               </label>
             </div>
-          </div>
-
-          {/* Bio */}
-          <div>
-            <label className="block text-xs font-bold text-dark-text uppercase tracking-wider mb-2 flex items-center gap-1.5">
-              <FileText className="w-3.5 h-3.5 text-forest" /> Biography / Summary *
-            </label>
-            <textarea
-              required
-              rows={3}
-              value={bio}
-              onChange={(e) => setBio(e.target.value)}
-              placeholder="Provide a brief summary of the coordinator's background and responsibilities..."
-              className="w-full px-4 py-3 bg-mint-fog/30 border border-forest/15 rounded-xl text-sm font-medium text-dark-text placeholder:text-forest/30 focus:outline-none focus:ring-2 focus:ring-forest focus:bg-white transition-all"
-            />
           </div>
 
           {/* Action Buttons */}

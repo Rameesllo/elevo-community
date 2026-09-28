@@ -25,12 +25,14 @@ export async function getTeamMembersService(filters?: {
       name: m.name,
       role: m.role,
       department: m.department as any,
-      bio: m.bio,
+      bio: (m as any).bio || undefined,
       email: m.email || undefined,
       phone: m.phone || undefined,
       initials: m.initials,
       badge: m.badge || undefined,
       image: (m as any).image || undefined,
+      linkedin: (m as any).linkedin || undefined,
+      instagram: (m as any).instagram || undefined,
       isActive: (m as any).isActive ?? true,
       displayOrder: (m as any).displayOrder ?? 0,
     }));
@@ -49,12 +51,14 @@ export async function getTeamMemberByIdService(id: string): Promise<TeamMember |
         name: member.name,
         role: member.role,
         department: member.department as any,
-        bio: member.bio,
+        bio: (member as any).bio || undefined,
         email: member.email || undefined,
         phone: member.phone || undefined,
         initials: member.initials,
         badge: member.badge || undefined,
         image: (member as any).image || undefined,
+        linkedin: (member as any).linkedin || undefined,
+        instagram: (member as any).instagram || undefined,
         isActive: (member as any).isActive ?? true,
         displayOrder: (member as any).displayOrder ?? 0,
       };
@@ -70,12 +74,14 @@ export async function createTeamMemberService(data: {
   name: string;
   role: string;
   department: string;
-  bio: string;
+  bio?: string;
   email?: string;
   phone?: string;
   initials?: string;
   badge?: string;
   image?: string;
+  linkedin?: string;
+  instagram?: string;
   isActive?: boolean;
   displayOrder?: number;
 }) {
@@ -94,12 +100,14 @@ export async function createTeamMemberService(data: {
         name: data.name,
         role: data.role,
         department: data.department,
-        bio: data.bio,
+        bio: data.bio || null,
         email: data.email || null,
         phone: data.phone || null,
         initials: initialsVal,
         badge: data.badge || null,
         image: data.image || null,
+        linkedin: data.linkedin || null,
+        instagram: data.instagram || null,
         isActive: data.isActive ?? true,
         displayOrder: data.displayOrder ?? 0,
       } as any,
@@ -123,6 +131,8 @@ export async function updateTeamMemberService(
     initials?: string;
     badge?: string;
     image?: string;
+    linkedin?: string;
+    instagram?: string;
     isActive?: boolean;
     displayOrder?: number;
   }
@@ -132,12 +142,14 @@ export async function updateTeamMemberService(
     if (data.name !== undefined) updatePayload.name = data.name;
     if (data.role !== undefined) updatePayload.role = data.role;
     if (data.department !== undefined) updatePayload.department = data.department;
-    if (data.bio !== undefined) updatePayload.bio = data.bio;
+    if (data.bio !== undefined) updatePayload.bio = data.bio || null;
     if (data.email !== undefined) updatePayload.email = data.email || null;
     if (data.phone !== undefined) updatePayload.phone = data.phone || null;
     if (data.initials !== undefined) updatePayload.initials = data.initials;
     if (data.badge !== undefined) updatePayload.badge = data.badge || null;
     if (data.image !== undefined) updatePayload.image = data.image || null;
+    if (data.linkedin !== undefined) updatePayload.linkedin = data.linkedin || null;
+    if (data.instagram !== undefined) updatePayload.instagram = data.instagram || null;
     if (data.isActive !== undefined) updatePayload.isActive = data.isActive;
     if (data.displayOrder !== undefined) updatePayload.displayOrder = data.displayOrder;
 

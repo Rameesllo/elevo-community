@@ -8,7 +8,6 @@ import {
   Calendar,
   Clock,
   MapPin,
-  Link as LinkIcon,
   FileText,
   Tag,
   CheckCircle2,
@@ -17,6 +16,9 @@ import {
   Trash2,
   ArrowLeft,
   Save,
+  Image as ImageIcon,
+  Upload,
+  X,
 } from "lucide-react";
 
 interface EventFormProps {
@@ -31,18 +33,35 @@ export default function EventForm({ initialData, isEdit = false }: EventFormProp
   const [date, setDate] = useState(initialData?.date || new Date().toISOString().split("T")[0]);
   const [time, setTime] = useState(initialData?.time || "");
   const [location, setLocation] = useState(initialData?.location || "");
-  const [meetingLink, setMeetingLink] = useState(initialData?.meetingLink || "");
   const [description, setDescription] = useState(initialData?.description || "");
   const [category, setCategory] = useState(initialData?.category || "sports");
-  const [status, setStatus] = useState<"UPCOMING" | "COMPLETED" | "CANCELLED">(
-    initialData?.status || "UPCOMING"
-  );
   const [featured, setFeatured] = useState(initialData?.featured || false);
+  const [image, setImage] = useState(initialData?.image || "");
+  const [imageUploading, setImageUploading] = useState(false);
 
   const [loading, setLoading] = useState(false);
   const [deleteLoading, setDeleteLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
+
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setImageUploading(true);
+    setError(null);
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+      const res = await fetch("/api/upload", { method: "POST", body: formData });
+      const data = await res.json();
+      if (!res.ok || !data.success) throw new Error(data.error || "Failed to upload poster");
+      setImage(data.data.url);
+    } catch (err: any) {
+      setError(err.message || "Could not upload poster");
+    } finally {
+      setImageUploading(false);
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -55,12 +74,13 @@ export default function EventForm({ initialData, isEdit = false }: EventFormProp
       date,
       time: time || null,
       location,
-      meetingLink: meetingLink || null,
+      meetingLink: null,
       description,
       category,
-      status,
-      upcoming: status === "UPCOMING",
+      status: "COMPLETED",
+      upcoming: false,
       featured,
+      image: image || null,
     };
 
     try {
@@ -75,7 +95,15 @@ export default function EventForm({ initialData, isEdit = false }: EventFormProp
 
       const data = await res.json();
       if (!res.ok || !data.success) {
-        throw new Error(data.error || "Failed to save event");
+        const detailMsg =
+          Array.isArray(data.details)
+            ? data.details.map((d: any) => `${d.path?.join(".")}: ${d.message}`).join(", ")
+            : typeof data.details === "string"
+            ? data.details
+            : data.details
+            ? JSON.stringify(data.details)
+            : "";
+        throw new Error(detailMsg ? `${data.error}: ${detailMsg}` : data.error || "Failed to save event");
       }
 
       setSuccess(isEdit ? "Event updated successfully!" : "Event created successfully!");
@@ -146,8 +174,8 @@ export default function EventForm({ initialData, isEdit = false }: EventFormProp
           </h2>
           <p className="text-xs text-dark-text/60 mt-1">
             {isEdit
-              ? "Update event schedules, location, meeting links, or mark as completed."
-              : "Publish a new sports, cultural, social, or educational community event."}
+              ? "Update conducted event poster, details, and archive information."
+              : "Archive a conducted event with its poster and details for the community showcase."}
           </p>
         </div>
 
@@ -181,125 +209,141 @@ export default function EventForm({ initialData, isEdit = false }: EventFormProp
             />
           </div>
 
-          {/* Date, Time, Status Grid */}
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-            <div>
-              <label className="block text-xs font-bold text-dark-text uppercase tracking-wider mb-2 flex items-center gap-1.5">
-                <Calendar className="w-3.5 h-3.5 text-forest" /> Date *
-              </label>
-              <input
-                type="date"
-                required
-                value={date}
-                onChange={(e) => setDate(e.target.value)}
-                className="w-full px-4 py-3 bg-mint-fog/30 border border-forest/15 rounded-xl text-sm font-medium text-dark-text focus:outline-none focus:ring-2 focus:ring-forest focus:bg-white transition-all"
-              />
-            </div>
-
-            <div>
-              <label className="block text-xs font-bold text-dark-text uppercase tracking-wider mb-2 flex items-center gap-1.5">
-                <Clock className="w-3.5 h-3.5 text-forest" /> Time
-              </label>
-              <input
-                type="text"
-                value={time}
-                onChange={(e) => setTime(e.target.value)}
-                placeholder="e.g. 09:00 AM - 04:00 PM"
-                className="w-full px-4 py-3 bg-mint-fog/30 border border-forest/15 rounded-xl text-sm font-medium text-dark-text placeholder:text-forest/30 focus:outline-none focus:ring-2 focus:ring-forest focus:bg-white transition-all"
-              />
-            </div>
-
-            <div>
-              <label className="block text-xs font-bold text-dark-text uppercase tracking-wider mb-2">
-                Status *
-              </label>
-              <select
-                value={status}
-                onChange={(e) => setStatus(e.target.value as any)}
-                className="w-full px-4 py-3 bg-mint-fog/30 border border-forest/15 rounded-xl text-sm font-medium text-dark-text focus:outline-none focus:ring-2 focus:ring-forest focus:bg-white transition-all cursor-pointer"
-              >
-                <option value="UPCOMING">Upcoming</option>
-                <option value="COMPLETED">Completed</option>
-                <option value="CANCELLED">Cancelled</option>
-              </select>
-            </div>
+          {/* Date */}
+          <div>
+            <label className="block text-xs font-bold text-dark-text uppercase tracking-wider mb-2 flex items-center gap-1.5">
+              <Calendar className="w-3.5 h-3.5 text-forest" /> Date *
+            </label>
+            <input
+              type="date"
+              required
+              value={date}
+              onChange={(e) => setDate(e.target.value)}
+              className="w-full px-4 py-3 bg-mint-fog/30 border border-forest/15 rounded-xl text-sm font-medium text-dark-text focus:outline-none focus:ring-2 focus:ring-forest focus:bg-white transition-all"
+            />
           </div>
 
-          {/* Location & Meeting Link */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div>
-              <label className="block text-xs font-bold text-dark-text uppercase tracking-wider mb-2 flex items-center gap-1.5">
-                <MapPin className="w-3.5 h-3.5 text-forest" /> Location / Venue *
-              </label>
-              <input
-                type="text"
-                required
-                value={location}
-                onChange={(e) => setLocation(e.target.value)}
-                placeholder="e.g. Elevo Stadium Ground, Kerala"
-                className="w-full px-4 py-3 bg-mint-fog/30 border border-forest/15 rounded-xl text-sm font-medium text-dark-text placeholder:text-forest/30 focus:outline-none focus:ring-2 focus:ring-forest focus:bg-white transition-all"
-              />
-            </div>
-
-            <div>
-              <label className="block text-xs font-bold text-dark-text uppercase tracking-wider mb-2 flex items-center gap-1.5">
-                <LinkIcon className="w-3.5 h-3.5 text-forest" /> Meeting Link (Optional)
-              </label>
-              <input
-                type="url"
-                value={meetingLink}
-                onChange={(e) => setMeetingLink(e.target.value)}
-                placeholder="e.g. https://meet.google.com/xyz"
-                className="w-full px-4 py-3 bg-mint-fog/30 border border-forest/15 rounded-xl text-sm font-medium text-dark-text placeholder:text-forest/30 focus:outline-none focus:ring-2 focus:ring-forest focus:bg-white transition-all"
-              />
-            </div>
+          {/* Time */}
+          <div>
+            <label className="block text-xs font-bold text-dark-text uppercase tracking-wider mb-2 flex items-center gap-1.5">
+              <Clock className="w-3.5 h-3.5 text-forest" /> Time
+            </label>
+            <input
+              type="text"
+              value={time}
+              onChange={(e) => setTime(e.target.value)}
+              placeholder="e.g. 09:00 AM - 04:00 PM"
+              className="w-full px-4 py-3 bg-mint-fog/30 border border-forest/15 rounded-xl text-sm font-medium text-dark-text placeholder:text-forest/30 focus:outline-none focus:ring-2 focus:ring-forest focus:bg-white transition-all"
+            />
           </div>
 
-          {/* Category & Featured */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 items-center">
-            <div>
-              <label className="block text-xs font-bold text-dark-text uppercase tracking-wider mb-2 flex items-center gap-1.5">
-                <Tag className="w-3.5 h-3.5 text-forest" /> Category *
-              </label>
-              <select
-                value={category}
-                onChange={(e) => setCategory(e.target.value as any)}
-                className="w-full px-4 py-3 bg-mint-fog/30 border border-forest/15 rounded-xl text-sm font-medium text-dark-text focus:outline-none focus:ring-2 focus:ring-forest focus:bg-white transition-all cursor-pointer"
-              >
-                <option value="sports">Sports</option>
-                <option value="cultural">Cultural</option>
-                <option value="social">Social</option>
-                <option value="educational">Educational</option>
-                <option value="other">Other</option>
-              </select>
-            </div>
+          {/* Location */}
+          <div>
+            <label className="block text-xs font-bold text-dark-text uppercase tracking-wider mb-2 flex items-center gap-1.5">
+              <MapPin className="w-3.5 h-3.5 text-forest" /> Location / Venue *
+            </label>
+            <input
+              type="text"
+              required
+              value={location}
+              onChange={(e) => setLocation(e.target.value)}
+              placeholder="e.g. Elevo Stadium Ground, Kerala"
+              className="w-full px-4 py-3 bg-mint-fog/30 border border-forest/15 rounded-xl text-sm font-medium text-dark-text placeholder:text-forest/30 focus:outline-none focus:ring-2 focus:ring-forest focus:bg-white transition-all"
+            />
+          </div>
 
-            <div className="pt-6">
-              <label className="flex items-center gap-3 cursor-pointer select-none">
-                <input
-                  type="checkbox"
-                  checked={featured}
-                  onChange={(e) => setFeatured(e.target.checked)}
-                  className="w-5 h-5 accent-forest rounded cursor-pointer"
-                />
-                <span className="text-xs font-bold text-dark-text">
-                  Feature on Homepage Hero Banner
-                </span>
+          {/* Category */}
+          <div>
+            <label className="block text-xs font-bold text-dark-text uppercase tracking-wider mb-2 flex items-center gap-1.5">
+              <Tag className="w-3.5 h-3.5 text-forest" /> Category *
+            </label>
+            <select
+              value={category}
+              onChange={(e) => setCategory(e.target.value as any)}
+              className="w-full px-4 py-3 bg-mint-fog/30 border border-forest/15 rounded-xl text-sm font-medium text-dark-text focus:outline-none focus:ring-2 focus:ring-forest focus:bg-white transition-all cursor-pointer"
+            >
+              <option value="sports">Sports</option>
+              <option value="cultural">Cultural</option>
+              <option value="social">Social</option>
+              <option value="educational">Educational</option>
+              <option value="other">Other</option>
+            </select>
+          </div>
+
+          {/* Featured */}
+          <div>
+            <label className="flex items-center gap-3 cursor-pointer select-none">
+              <input
+                type="checkbox"
+                checked={featured}
+                onChange={(e) => setFeatured(e.target.checked)}
+                className="w-5 h-5 accent-forest rounded cursor-pointer"
+              />
+              <span className="text-xs font-bold text-dark-text">
+                Feature on Homepage Hero Banner
+              </span>
+            </label>
+          </div>
+
+          {/* Poster Upload */}
+          <div>
+            <label className="block text-xs font-bold text-dark-text uppercase tracking-wider mb-2 flex items-center gap-1.5">
+              <ImageIcon className="w-3.5 h-3.5 text-forest" /> Event Poster (Image)
+            </label>
+            {image ? (
+              <div className="relative group rounded-2xl overflow-hidden border border-forest/15 bg-mint-fog/20">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src={image} alt="Event poster preview" className="w-full max-h-[320px] object-contain bg-white" />
+                <button
+                  type="button"
+                  onClick={() => setImage("")}
+                  className="absolute top-3 right-3 p-2 bg-white/90 hover:bg-white text-dark-text rounded-xl shadow-sm border border-border transition-colors cursor-pointer"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+                <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/50 to-transparent p-3">
+                  <p className="text-[11px] font-semibold text-white">Poster uploaded — click X to replace</p>
+                </div>
+              </div>
+            ) : (
+              <label className="flex flex-col items-center justify-center gap-3 w-full px-6 py-8 bg-mint-fog/30 border-2 border-dashed border-forest/15 rounded-2xl cursor-pointer hover:bg-mint-fog/50 hover:border-forest/25 transition-all group">
+                <div className="w-12 h-12 rounded-2xl bg-white border border-forest/10 flex items-center justify-center group-hover:scale-105 transition-transform">
+                  {imageUploading ? <Loader2 className="w-5 h-5 animate-spin text-forest" /> : <Upload className="w-5 h-5 text-forest" />}
+                </div>
+                <div className="text-center">
+                  <p className="text-xs font-bold text-dark-text">
+                    {imageUploading ? "Uploading poster..." : "Upload event poster"}
+                  </p>
+                  <p className="text-[11px] text-dark-text/60 mt-1">PNG, JPG, WEBP up to 5MB — will be shown on conducted events archive</p>
+                </div>
+                <input type="file" accept="image/*" onChange={handleImageUpload} disabled={imageUploading} className="hidden" />
               </label>
-            </div>
+            )}
+            {!image && (
+              <label className="mt-3 flex items-center gap-2 text-xs">
+                <input type="file" accept="image/*" onChange={handleImageUpload} disabled={imageUploading} className="block w-full text-xs text-muted file:mr-3 file:py-1.5 file:px-3 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-forest file:text-white hover:file:bg-forest/90 file:cursor-pointer cursor-pointer" />
+              </label>
+            )}
+            {image && (
+              <label className="mt-3 inline-flex items-center gap-2 px-3 py-1.5 bg-mint-fog border border-forest/10 rounded-xl text-xs font-semibold text-forest cursor-pointer hover:bg-mint-fog/80 transition-colors">
+                <Upload className="w-3.5 h-3.5" />
+                Replace poster
+                <input type="file" accept="image/*" onChange={handleImageUpload} disabled={imageUploading} className="hidden" />
+              </label>
+            )}
           </div>
 
           {/* Description */}
           <div>
             <label className="block text-xs font-bold text-dark-text uppercase tracking-wider mb-2 flex items-center gap-1.5">
-              <FileText className="w-3.5 h-3.5 text-forest" /> Event Description *
+              <FileText className="w-3.5 h-3.5 text-forest" /> Event Details *
             </label>
             <textarea
               required
               rows={4}
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              placeholder="Describe the event itinerary, requirements, and participation details..."
+              placeholder="Describe what was conducted, highlights, chief guests, outcomes..."
               className="w-full px-4 py-3 bg-mint-fog/30 border border-forest/15 rounded-xl text-sm font-medium text-dark-text placeholder:text-forest/30 focus:outline-none focus:ring-2 focus:ring-forest focus:bg-white transition-all"
             />
           </div>

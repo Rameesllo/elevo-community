@@ -29,13 +29,15 @@ export interface TeamMember {
   id: string;
   name: string;
   role: string;
-  department: "Executive Committee" | "Office Bearers" | "Program Coordinators" | "Youth Wing";
-  bio: string;
+  department: "Founders" | "Current Team" | "Alumni" | "Executive Committee" | "Office Bearers" | "Program Coordinators" | "Youth Wing";
+  bio?: string;
   email?: string;
   phone?: string;
   initials: string;
   badge?: string;
   image?: string;
+  linkedin?: string;
+  instagram?: string;
   isActive?: boolean;
   displayOrder?: number;
 }

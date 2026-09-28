@@ -29,7 +29,9 @@ export async function POST(request: NextRequest) {
     return apiSuccess(newEvent, 201);
   } catch (error: any) {
     if (error?.name === "ZodError") {
-      return apiError("Validation failed", 400, error.errors);
+      const details = error.issues ?? error.errors ?? error.message;
+      console.error("Event validation failed:", JSON.stringify(details, null, 2));
+      return apiError("Validation failed", 400, details);
     }
     return apiError("Failed to create event", 500, error?.message || error);
   }

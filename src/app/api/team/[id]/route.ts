@@ -39,7 +39,8 @@ export async function PUT(
     return apiSuccess(updatedMember);
   } catch (error: any) {
     if (error?.name === "ZodError") {
-      return apiError("Validation error", 400, error.errors);
+      const details = error.issues ?? error.errors ?? error.message;
+      return apiError("Validation error", 400, details);
     }
     return apiError("Failed to update team member", 500, error?.message || error);
   }

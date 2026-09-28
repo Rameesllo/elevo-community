@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { CalendarDays, MapPin, Clock, ArrowRight } from "lucide-react";
+import { CalendarDays, MapPin, Clock, ArrowRight, Image as ImageIcon } from "lucide-react";
 import { Badge } from "@/components/ui/Badge";
 import { prisma } from "@/lib/prisma";
 
@@ -24,11 +24,14 @@ function formatDate(date: Date) {
 }
 
 export async function EventsSection() {
-  const upcomingEvents = await prisma.event.findMany({
-    where: { upcoming: true },
-    orderBy: { date: "asc" },
+  // Show recent conducted events (archive with posters)
+  const conductedEvents = await prisma.event.findMany({
+    where: { OR: [{ status: "COMPLETED" }, { upcoming: false }] },
+    orderBy: { date: "desc" },
     take: 3,
   });
+
+  if (conductedEvents.length === 0) return null;
 
   return (
     <section className="section bg-white border-b border-border">
@@ -36,56 +39,68 @@ export async function EventsSection() {
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-10">
           <div>
-            <div className="section-tag mb-4">Community Calendar</div>
+            <div className="section-tag mb-4">Conducted Events</div>
             <h2 className="text-dark-text">
-              Upcoming <span className="text-forest">Events</span>
+              Recently <span className="text-forest">Conducted</span>
             </h2>
             <p className="mt-2 text-dark-text/60 max-w-lg">
-              Join in on tournaments, workshops, and volunteer drives happening in Elevo.
+              Highlights from our recently conducted programs — posters and stories from the ground.
             </p>
           </div>
           <Link href="/events" className="btn-secondary gap-2 flex-shrink-0 self-start sm:self-auto">
-            View All Events
+            View All Conducted Events
             <ArrowRight className="w-4 h-4" />
           </Link>
         </div>
 
         {/* Events grid */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-          {upcomingEvents.map((event) => (
-            <article key={event.id} className="card flex flex-col justify-between group">
-              <div>
-                <div className="flex items-center justify-between mb-3">
-                  <Badge variant={categoryColors[event.category] ?? "default"}>
-                    {categoryLabels[event.category]}
-                  </Badge>
-                  <span className="text-xs font-semibold text-forest bg-mint-fog px-2.5 py-0.5 rounded-full border border-border/60">
-                    Upcoming
-                  </span>
-                </div>
-
-                <h3 className="text-base font-semibold text-dark-text leading-snug group-hover:text-forest transition-colors">
-                  {event.title}
-                </h3>
-                <p className="text-sm text-dark-text/60 mt-2.5 leading-relaxed line-clamp-3">
-                  {event.description}
-                </p>
-              </div>
-
-              <div className="mt-5 pt-3 border-t border-border space-y-1.5">
-                <div className="flex items-center gap-2 text-xs text-muted">
-                  <CalendarDays className="w-3.5 h-3.5 flex-shrink-0 text-forest" />
-                  {formatDate(event.date)}
-                </div>
-                {event.time && (
-                  <div className="flex items-center gap-2 text-xs text-muted">
-                    <Clock className="w-3.5 h-3.5 flex-shrink-0 text-forest" />
-                    {event.time}
+          {conductedEvents.map((event) => (
+            <article key={event.id} className="card flex flex-col overflow-hidden p-0 group">
+              {/* Poster */}
+              <div className="relative bg-mint-fog/30 border-b border-border overflow-hidden">
+                {event.image ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img src={event.image} alt={`${event.title} poster`} className="w-full h-48 object-cover group-hover:scale-[1.02] transition-transform duration-300" />
+                ) : (
+                  <div className="w-full h-48 flex flex-col items-center justify-center gap-2 bg-gradient-to-br from-mint-fog to-white">
+                    <ImageIcon className="w-7 h-7 text-forest/20" />
+                    <span className="text-xs font-medium text-forest/40">Poster pending</span>
                   </div>
                 )}
-                <div className="flex items-center gap-2 text-xs text-muted">
-                  <MapPin className="w-3.5 h-3.5 flex-shrink-0 text-forest" />
-                  {event.location}
+                <div className="absolute top-3 left-3">
+                  <Badge variant={categoryColors[event.category] ?? "default"}>
+                    {categoryLabels[event.category] || event.category}
+                  </Badge>
+                </div>
+                <span className="absolute top-3 right-3 text-[11px] font-semibold bg-white/95 px-2.5 py-1 rounded-full border border-border text-forest">
+                  Conducted
+                </span>
+              </div>
+
+              <div className="p-5 flex flex-col flex-1">
+                <h3 className="text-base font-semibold text-dark-text leading-snug group-hover:text-forest transition-colors line-clamp-2">
+                  {event.title}
+                </h3>
+                <p className="text-sm text-dark-text/60 mt-2.5 leading-relaxed line-clamp-2">
+                  {event.description}
+                </p>
+
+                <div className="mt-4 pt-3 border-t border-border space-y-1.5">
+                  <div className="flex items-center gap-2 text-xs text-muted">
+                    <CalendarDays className="w-3.5 h-3.5 flex-shrink-0 text-forest" />
+                    {formatDate(event.date)}
+                  </div>
+                  {event.time && (
+                    <div className="flex items-center gap-2 text-xs text-muted">
+                      <Clock className="w-3.5 h-3.5 flex-shrink-0 text-forest" />
+                      {event.time}
+                    </div>
+                  )}
+                  <div className="flex items-center gap-2 text-xs text-muted">
+                    <MapPin className="w-3.5 h-3.5 flex-shrink-0 text-forest" />
+                    <span className="line-clamp-1">{event.location}</span>
+                  </div>
                 </div>
               </div>
             </article>

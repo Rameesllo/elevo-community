@@ -24,7 +24,7 @@ export default async function AdminTeamPage() {
             Team Directory Management
           </h1>
           <p className="text-xs text-dark-text/70 mt-1">
-            Add leaders, coordinators, upload photos, change display orders, and activate/deactivate members.
+            Manage Founders (layer 1), Current Team (layer 2: Executive / Office Bearers / Coordinators / Youth Wing), and Alumni (layer 3) — with photos.
           </p>
         </div>
 

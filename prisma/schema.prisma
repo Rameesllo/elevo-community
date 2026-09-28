@@ -47,12 +47,14 @@ model TeamMember {
   name         String
   role         String
   department   String
-  bio          String   @db.Text
+  bio          String?  @db.Text
   email        String?
   phone        String?
   initials     String
   badge        String?
   image        String?
+  linkedin     String?
+  instagram    String?
   isActive     Boolean  @default(true)
   displayOrder Int      @default(0)
   createdAt    DateTime @default(now())

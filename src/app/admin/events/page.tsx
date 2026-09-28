@@ -11,6 +11,7 @@ import {
   Clock,
   Link as LinkIcon,
   Edit,
+  Image as ImageIcon,
 } from "lucide-react";
 
 export default async function AdminEventsPage() {
@@ -29,7 +30,7 @@ export default async function AdminEventsPage() {
             Events Management
           </h1>
           <p className="text-xs text-dark-text/70 mt-1">
-            Create, view, update, and manage community activities, tournaments, and drives.
+            Archive conducted events with posters and detailed highlights for the public showcase.
           </p>
         </div>
 
@@ -38,7 +39,7 @@ export default async function AdminEventsPage() {
           className="px-4 py-2.5 bg-forest hover:bg-forest/90 text-white text-xs font-bold rounded-xl transition-all shadow-sm flex items-center justify-center gap-2 cursor-pointer shrink-0"
         >
           <PlusCircle className="w-4 h-4" />
-          <span>Create New Event</span>
+          <span>Archive Conducted Event</span>
         </Link>
       </div>
 
@@ -46,16 +47,17 @@ export default async function AdminEventsPage() {
       <div className="bg-white rounded-3xl border border-forest/10 shadow-sm overflow-hidden">
         {events.length === 0 ? (
           <div className="p-12 text-center text-xs text-dark-text/60">
-            No events found. Click &quot;Create New Event&quot; to add your first community activity.
+            No conducted events archived yet. Click &quot;Archive Conducted Event&quot; to add your first poster & details.
           </div>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full text-left border-collapse text-xs">
               <thead>
                 <tr className="bg-mint-fog/60 border-b border-forest/10 text-dark-text/70 uppercase tracking-wider font-bold">
+                  <th className="py-4 px-4">Poster</th>
                   <th className="py-4 px-6">Event Title & Category</th>
                   <th className="py-4 px-4">Date & Time</th>
-                  <th className="py-4 px-4">Location / Link</th>
+                  <th className="py-4 px-4">Location</th>
                   <th className="py-4 px-4">Status</th>
                   <th className="py-4 px-6 text-right">Actions</th>
                 </tr>
@@ -63,8 +65,18 @@ export default async function AdminEventsPage() {
               <tbody className="divide-y divide-forest/10 font-medium text-dark-text">
                 {events.map((evt) => (
                   <tr key={evt.id} className="hover:bg-mint-fog/20 transition-colors">
+                    <td className="py-3 px-4">
+                      {evt.image ? (
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img src={evt.image} alt={`${evt.title} poster`} className="w-14 h-14 object-cover rounded-xl border border-border" />
+                      ) : (
+                        <div className="w-14 h-14 rounded-xl bg-mint-fog border border-border flex items-center justify-center">
+                          <ImageIcon className="w-5 h-5 text-forest/30" />
+                        </div>
+                      )}
+                    </td>
                     <td className="py-4 px-6">
-                      <div className="font-bold text-sm text-forest">{evt.title}</div>
+                      <div className="font-bold text-sm text-forest line-clamp-1">{evt.title}</div>
                       <div className="flex items-center gap-2 mt-1">
                         <span className="capitalize text-[11px] text-dark-text/60 font-semibold bg-mint-fog px-2 py-0.5 rounded-md">
                           {evt.category}
@@ -95,16 +107,6 @@ export default async function AdminEventsPage() {
                         <MapPin className="w-3.5 h-3.5 text-forest shrink-0" />
                         <span className="truncate">{evt.location}</span>
                       </div>
-                      {evt.meetingLink && (
-                        <a
-                          href={evt.meetingLink}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="inline-flex items-center gap-1 text-[11px] text-blue-600 hover:underline mt-0.5 font-semibold"
-                        >
-                          <LinkIcon className="w-3 h-3" /> Join Link
-                        </a>
-                      )}
                     </td>
 
                     <td className="py-4 px-4">

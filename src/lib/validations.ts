@@ -4,15 +4,15 @@ import { z } from "zod";
 export const createEventSchema = z.object({
   title: z.string().min(3, "Title must be at least 3 characters"),
   date: z.string().min(1, "Date is required"),
-  time: z.string().optional().nullable(),
+  time: z.string().optional().nullable().or(z.literal("")),
   location: z.string().min(2, "Location is required"),
-  meetingLink: z.string().url("Must be a valid URL").optional().nullable().or(z.literal("")),
+  meetingLink: z.union([z.string().url("Must be a valid URL"), z.literal(""), z.null()]).optional().nullable(),
   description: z.string().min(10, "Description must be at least 10 characters"),
   category: z.enum(["sports", "cultural", "social", "educational", "other"]).default("other"),
   status: z.enum(["UPCOMING", "COMPLETED", "CANCELLED"]).default("UPCOMING"),
   upcoming: z.boolean().default(true),
   featured: z.boolean().default(false),
-  image: z.string().optional().nullable().or(z.literal("")),
+  image: z.union([z.string(), z.literal(""), z.null()]).optional().nullable(),
 });
 
 export const updateEventSchema = createEventSchema.partial();
@@ -38,17 +38,22 @@ export const createTeamMemberSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters"),
   role: z.string().min(2, "Role is required"),
   department: z.enum([
+    "Founders",
+    "Current Team",
+    "Alumni",
     "Executive Committee",
     "Office Bearers",
     "Program Coordinators",
     "Youth Wing",
   ]),
-  bio: z.string().min(5, "Bio must be at least 5 characters"),
+  bio: z.string().optional().nullable().or(z.literal("")),
   email: z.string().email().optional().nullable().or(z.literal("")),
   phone: z.string().optional().nullable().or(z.literal("")),
   initials: z.string().max(4).optional().nullable().or(z.literal("")),
   badge: z.string().optional().nullable().or(z.literal("")),
   image: z.string().optional().nullable().or(z.literal("")),
+  linkedin: z.union([z.string().url("Must be a valid LinkedIn URL"), z.literal(""), z.null()]).optional().nullable(),
+  instagram: z.union([z.string().url("Must be a valid Instagram URL"), z.literal(""), z.null()]).optional().nullable(),
   isActive: z.boolean().default(true),
   displayOrder: z.number().int().default(0),
 });

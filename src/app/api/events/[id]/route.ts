@@ -39,7 +39,9 @@ export async function PUT(
     return apiSuccess(updatedEvent);
   } catch (error: any) {
     if (error?.name === "ZodError") {
-      return apiError("Validation error", 400, error.errors);
+      const details = error.issues ?? error.errors ?? error.message;
+      console.error("Event update validation failed:", JSON.stringify(details, null, 2));
+      return apiError("Validation error", 400, details);
     }
     if (error?.message === "Event not found") {
       return apiError("Event not found", 404);
